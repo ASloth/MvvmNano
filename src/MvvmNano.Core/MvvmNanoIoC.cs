@@ -1,4 +1,6 @@
-﻿using Ninject;
+﻿  
+using System;
+using Microsoft.Practices.Unity; 
 
 namespace MvvmNano
 {
@@ -11,11 +13,11 @@ namespace MvvmNano
     /// </summary>
     public static class MvvmNanoIoC
     {
-        private static readonly StandardKernel _kernel;
+        public static UnityContainer _container;
 
         static MvvmNanoIoC()
         {
-            _kernel = new StandardKernel();
+            //_container = new UnityContainer();
         }
 
         /// <summary>
@@ -25,10 +27,9 @@ namespace MvvmNano
         /// <typeparam name="TInterface">The type of the interface, for example IUserRepository.</typeparam>
         /// <typeparam name="TImplementation">The type of the implementation, for example SqliteUserRepository.</typeparam>
         public static void Register<TInterface, TImplementation>()
-            where TImplementation : TInterface
+            where TImplementation :  TInterface
         {
-            _kernel.Unbind<TInterface>();
-            _kernel.Bind<TInterface>().To<TImplementation>();
+            _container.RegisterType<TInterface, TImplementation>(); 
         }
 
         /// <summary>
@@ -40,11 +41,10 @@ namespace MvvmNano
         /// </summary>
         /// <typeparam name="TInterface">The type of the interface, for example IUserRepository.</typeparam>
         /// <typeparam name="TImplementation">The type of the implementation, for example SqliteUserRepository.</typeparam>
-        public static void RegisterAsSingleton<TInterface, TImplementation>()
+        public static void RegisterAsSingleton<TInterface, TImplementation>() 
             where TImplementation : TInterface
         {
-            _kernel.Unbind<TInterface>();
-            _kernel.Bind<TInterface>().To<TImplementation>().InSingletonScope();
+            _container.RegisterType<TInterface, TImplementation>(new ContainerControlledLifetimeManager()); 
         }
 
         /// <summary>
@@ -54,19 +54,18 @@ namespace MvvmNano
         /// </summary>
         /// <param name="instance">The concrete instance.</param>
         /// <typeparam name="TInterface">The type of the Interface.</typeparam>
-        public static void RegisterAsSingleton<TInterface>(TInterface instance)
+        public static void RegisterAsSingleton<TInterface>(TInterface instance) 
         {
-            _kernel.Unbind<TInterface>();
-            _kernel.Bind<TInterface>().ToConstant(instance);
+            _container.RegisterInstance<TInterface>(instance, new ContainerControlledLifetimeManager());
         }
 
         /// <summary>
         /// Resolves the implemenation of the Interface, if properly registered before.
         /// </summary>
         /// <typeparam name="TInterface">The type of the Interface.</typeparam>
-        public static TInterface Resolve<TInterface>()
+        public static TInterface Resolve<TInterface>() 
         {
-            return _kernel.Get<TInterface>();
+            return _container.Resolve<TInterface>();
         }
     }
 }

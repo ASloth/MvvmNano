@@ -56,7 +56,7 @@ namespace MvvmNano.Forms
 
                 return tabbedPage != null
                     ? tabbedPage.CurrentPage
-                        : currentPage;
+                    : currentPage;
             }
         }
 
@@ -97,7 +97,7 @@ namespace MvvmNano.Forms
             IViewModel<TNavigationParameter> viewModel = CreateViewModel<TViewModel, TNavigationParameter>();
             viewModel.Initialize(parameter);
             IView viewFor = CreateViewFor<TViewModel>();
-            viewFor.SetViewModel((IViewModel)viewModel);
+            viewFor.SetViewModel((IViewModel) viewModel);
             OpenPage<TViewModel>(viewFor as Page);
         }
 
@@ -106,8 +106,10 @@ namespace MvvmNano.Forms
         /// </summary>
         /// <param name="data"></param>
         public void SetDetail(MasterDetailData data)
-        { 
-            typeof(MvvmNanoFormsPresenter).GetRuntimeMethod("NavigateToViewModel", parameters: new Type[0]).MakeGenericMethod(data.ViewModelType).Invoke(this, (object[])null);
+        {
+            typeof (MvvmNanoFormsPresenter).GetRuntimeMethod("NavigateToViewModel", parameters: new Type[0])
+                .MakeGenericMethod(data.ViewModelType)
+                .Invoke(this, (object[]) null);
         }
 
         /// <summary>
@@ -118,10 +120,11 @@ namespace MvvmNano.Forms
         {
             MvvmNanoViewModel viewModel = MvvmNanoFormsPresenter.CreateViewModel<TViewModel>() as MvvmNanoViewModel;
             if (viewModel == null)
-                throw new MvvmNanoFormsPresenterException(typeof(TViewModel).ToString() + " is not a MvvmNanoViewModel (without parameter).");
+                throw new MvvmNanoFormsPresenterException(typeof (TViewModel).ToString() +
+                                                          " is not a MvvmNanoViewModel (without parameter).");
             viewModel.Initialize();
             IView viewFor = this.CreateViewFor<TViewModel>();
-            viewFor.SetViewModel((IViewModel)viewModel);
+            viewFor.SetViewModel((IViewModel) viewModel);
             this.OpenPage<TViewModel>(viewFor as Page);
         }
 
@@ -130,7 +133,7 @@ namespace MvvmNano.Forms
         /// </summary>
         public IView CreateViewFor<TViewModel>()
         {
-            string viewName = GetViewNameByViewModel(typeof(TViewModel));
+            string viewName = GetViewNameByViewModel(typeof (TViewModel));
             Type pageType = _availableViewTypes
                 .FirstOrDefault(t => t.Name == viewName);
 
@@ -157,7 +160,7 @@ namespace MvvmNano.Forms
 
             Device.BeginInvokeOnMainThread(async () =>
                 await CurrentPage.Navigation.PushAsync(page, true)
-            );
+                );
         }
 
         /// <summary>
@@ -168,17 +171,21 @@ namespace MvvmNano.Forms
         /// <param name="page"></param>
         private void OpenPage<TViewModel>(Page page)
         {
-            if (Application.MasterPage != null && 
-                Application.MasterDetails.FirstOrDefault(o => o.ViewModelType == typeof (TViewModel)) != null) //Check if the new page is a detail page
+            if (Application.MasterPage != null &&
+                Application.MasterDetails.FirstOrDefault(o => o.ViewModelType == typeof (TViewModel)) != null)
+                //Check if the new page is a detail page
             {
                 //Check if the current page is opened as modal page and close it if that is the case.
-                if (Application.MasterPage.Detail.Navigation.ModalStack.Any()
-                    && Application.MasterPage.Detail.Navigation.ModalStack.FirstOrDefault() == CurrentPage)
+                Device.BeginInvokeOnMainThread(async () =>
                 {
-                    Device.BeginInvokeOnMainThread(async () => await Application.MasterPage.Detail.Navigation.PopModalAsync());
-                }
+                    if (Application.MasterPage.Detail.Navigation.ModalStack.Any()
+                        && Application.MasterPage.Detail.Navigation.ModalStack.FirstOrDefault() == CurrentPage)
+                    {
+                        await Application.MasterPage.Detail.Navigation.PopModalAsync();
+                    }
+                });
                 Application.MasterPage.SetDetail(page);
-            } 
+            }
             else
                 OpenPage(page);
         }

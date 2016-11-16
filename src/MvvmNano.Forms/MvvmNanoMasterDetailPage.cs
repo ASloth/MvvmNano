@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq.Expressions;
-using System.ServiceModel.Channels;
+﻿using System; 
+using System.Linq.Expressions; 
 using Xamarin.Forms;
 
 namespace MvvmNano.Forms
